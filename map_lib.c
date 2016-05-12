@@ -2,7 +2,7 @@
 // A simple associative-array library for C
 //
 // License: MIT / X11
-// Copyright (c) 2009, 2015 by James K. Lawless
+// Copyright (c) 2009, 2012 by James K. Lawless
 // jimbo@radiks.net http://www.radiks.net/~jimbo
 // http://www.mailsend-online.com
 //
@@ -35,52 +35,19 @@
 struct map_t *map_create() {
    struct map_t *m;
    m=(struct map_t *)malloc(sizeof(struct map_t));
-   if(!m)
-      return NULL;
    m->name=NULL;
-   m->tag=MAP_OF_STRINGS;
-   m->v->value=NULL;
+   m->value=NULL;
    m->nxt=NULL;
-   return m;
 }
 
-void map_free(struct map_t *map) {
-   if(!map)
-      return;
-
-   struct map_t *m, *mp;
-
-   m=map;
-   while(m!=NULL) {
-      if(m->name!=NULL)
-         free(m->name);
-      switch(m->tag) {
-         case MAP_OF_STRINGS:
-            if(m->v->value!=NULL)
-               free(m->v->value;
-            break;
-         case MAP_OF_STRUCTS:
-            if(m->v->structValue!=NULL)
-               free(m->v->structValue;
-            break;
-      }
-      mp=m;
-      m=m->nxt;
-      free(mp);
-   }
-}
 
 void map_set(struct map_t *m,char *name,char *value) {
    struct map_t *map;
 
    if(m->name==NULL) {
       m->name=(char *)malloc(strlen(name)+1);
-      if(!m->name)
-         return;
       strcpy(m->name,name);
       m->value=(char *)malloc(strlen(value)+1);
-      if(!m->value)
-         return;
       strcpy(m->value,value);
       m->nxt=NULL;
       return;
@@ -90,67 +57,80 @@ void map_set(struct map_t *m,char *name,char *value) {
          if(map->value!=NULL) {
             free(map->value);
             map->value=(char *)malloc(strlen(value)+1);
-            if(!map->value)
-               return;
             strcpy(map->value,value);
             return;
          }
       }
       if(map->nxt==NULL) {
          map->nxt=(struct map_t *)malloc(sizeof(struct map_t));
-         if(!map->nxt)
-            return;
          map=map->nxt;
          map->name=(char *)malloc(strlen(name)+1);
-	 if(!map->name)
-            return;
          strcpy(map->name,name);
          map->value=(char *)malloc(strlen(value)+1);
-         if(!map->value)
-            return;
          strcpy(map->value,value);
          map->nxt=NULL;
          return;
-      }
+      }      
    }
 }
 
 char *map_get(struct map_t *m,char *name) {
    struct map_t *map;
-   map=map_find(m,name);
-   if(map!=NULL)
-      return m->v->value;
-   else
-      return "";
+   for(map=m;map!=NULL;map=map->nxt) {
+      if(!strcasecmp(name,map->name)) {
+         return map->value;
+      }
+   }
+   return "";
 }
+ 
 
-int map_int_get(struct map_t *m,char *name) {
-   struct map_t *map;
-   map=map_find(m,name);
-   if(map!=NULL)
-      return m->v->intValue;
-   else
-      return 0;
-}
-
-void *map_struct_get(struct map_t *m,char *name) {
-   struct map_t *map;
-   map=map_find(m,name);
-   if(map!=NULL)
-      return m->v->structValue;
-   else
-      return NULL;
-}
-
-
-map_t *map_find(struct map_t *m,char *name) {
+void *map_get_ptr(struct map_t *m,char *name) {
    struct map_t *map;
    for(map=m;map!=NULL;map=map->nxt) {
-      if(map->name && !strcasecmp(name,map->name)) {
-         return map;
+      if(!strcasecmp(name,map->name)) {
+         return map->value;
       }
    }
    return NULL;
 }
 
+void map_set_ptr(struct map_t *m,char *name, void *value) {
+   struct map_t *map;
+
+   if(m->name==NULL) {
+      m->name=(char *)malloc(strlen(name)+1);
+      strcpy(m->name,name);
+      m->value=value;
+      m->nxt=NULL;
+      return;
+   }
+   for(map=m;;map=map->nxt) {
+      if(!strcasecmp(name,map->name)) {
+         map->value=value;
+            return;
+      }
+      if(map->nxt==NULL) {
+         map->nxt=(struct map_t *)malloc(sizeof(struct map_t));
+         map=map->nxt;
+         map->name=(char *)malloc(strlen(name)+1);
+         strcpy(map->name,name);
+         map->value=value;
+         map->nxt=NULL;
+         return;
+      }      
+   }   
+}
+
+void map_free_strings(struct map_t *m) {
+   struct map_t *map=m;
+   for(map=m;map!=NULL;map=map->nxt) {
+      if(map->name!=NULL) {
+         free(map->name);
+      }
+      if(map->value!=NULL) {
+         free(map->value);
+      }      
+   }
+}
 
