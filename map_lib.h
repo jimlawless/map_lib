@@ -2,9 +2,9 @@
 // A simple associative-array library for C
 //
 // License: MIT / X11
-// Copyright (c) 2009, 2012 by James K. Lawless
-// jimbo@radiks.net http://www.radiks.net/~jimbo
-// http://www.mailsend-online.com
+// Copyright (c) 2009, 2012, 2018 by James K. Lawless
+// jimbo@radiks.net 
+// https://jiml.us
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -27,22 +27,18 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 #ifndef MAP_LIB_H
 #define MAP_LIB_H
 
 struct map_t {
    struct map_t *nxt;
    char *name;
-   void *value;
+   char *value;
 } ;
-
 
 struct map_t *map_create();
 void map_set(struct map_t *m,char *name,char *value);
 char *map_get(struct map_t *m,char *name);
-void *map_get_ptr(struct map_t *m,char *name);
-void map_set_ptr(struct map_t *m,char *name, void *value);
-void map_free_strings(struct map_t *m);
+
 #endif
- 
+
